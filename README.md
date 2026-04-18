@@ -1,0 +1,2 @@
+# 2026-Mt.-FUJI-ASUMI-40k-Pace
+2026 Mt. FUJI ASUMI 40k Pace
