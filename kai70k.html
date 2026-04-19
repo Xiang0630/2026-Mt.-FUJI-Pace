@@ -41,6 +41,10 @@
 <div class="rest-ctrl"><div class="seg-ctrl-head" style="margin-bottom:var(--s3)"><span class="seg-tag tr-">休息</span><span class="seg-ctrl-title">各補給站休息時間</span><span style="font-size:var(--text-xs);color:var(--txm);margin-left:auto">K1 / K2 / K3 / K4</span></div><div class="ctrl-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:0"><div><div class="seg-meta">K1 休息</div><div class="input-row"><input type="number" class="rest-num" id="rest1" value="10" min="0" max="120" step="1" oninput="recalc()"><span style="font-size:var(--text-xs);color:var(--txm)">min</span></div></div><div><div class="seg-meta">K2 休息</div><div class="input-row"><input type="number" class="rest-num" id="rest2" value="10" min="0" max="120" step="1" oninput="recalc()"><span style="font-size:var(--text-xs);color:var(--txm)">min</span></div></div><div><div class="seg-meta">K3 休息</div><div class="input-row"><input type="number" class="rest-num" id="rest3" value="5" min="0" max="120" step="1" oninput="recalc()"><span style="font-size:var(--text-xs);color:var(--txm)">min</span></div></div><div><div class="seg-meta">K4 休息</div><div class="input-row"><input type="number" class="rest-num" id="rest4" value="10" min="0" max="120" step="1" oninput="recalc()"><span style="font-size:var(--text-xs);color:var(--txm)">min</span></div></div></div><div class="rest-info" id="rest-info">補給站休息時間會直接加到總時間與後續到站預估。</div></div>
 <div class="bottom-ctrl"><span class="ctrl-lbl">📍 出發時間</span><input type="time" class="time-inp" id="start-t" value="14:00" oninput="recalc()"><span style="font-size:var(--text-xs);color:var(--txm)">預設依 21 小時限時推算為 Apr.25 14:00 起跑</span></div>
 <div class="res-bar"><div class="ri"><span class="rl">總 EP</span><span class="rv">97.81</span></div><div class="dvv"></div><div class="ri"><span class="rl">總跑步時間</span><span class="rv" id="rb-run">—</span></div><div class="dvv"></div><div class="ri"><span class="rl">總休息時間</span><span class="rv" id="rb-rest">—</span></div><div class="dvv"></div><div class="ri"><span class="rl">總時間</span><span class="rv" id="rb-total">—</span></div><div class="dvv"></div><div class="ri"><span class="rl">完賽時刻</span><span class="rv" id="rb-clock">—</span></div><div class="dvv"></div><div class="ri"><span class="rl">完賽餘裕</span><span class="rv" id="rb-mg">—</span></div></div>
+<div style="margin-bottom:var(--s6);display:flex;gap:var(--s3);flex-wrap:wrap;align-items:center">
+<button onclick="downloadWallpaper()" style="display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:999px;background:rgba(192,38,211,.14);border:1px solid rgba(192,38,211,.3);color:#d88ae3;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;transition:all 180ms" onmouseover="this.style.background='#c026d3';this.style.color='#fff'" onmouseout="this.style.background='rgba(192,38,211,.14)';this.style.color='#d88ae3'"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>匯出手機壁紙 JPEG</button>
+<span style="font-size:12px;color:var(--txm)">主配速 + 慢 0.5h 雙欄 · 1290×2796</span>
+</div>
 <div class="tbl-wrap"><div class="tbl-hd"><div class="tbl-title">配速表</div><div class="tbl-hint">5 段獨立 EPH + 4 站休息時間 · 與 ASUMI 同版型</div></div><div style="overflow-x:auto"><table><thead><tr><th>區段</th><th class="right">距離</th><th>爬升 / 下降</th><th class="right">EP / EPH</th><th class="right">段落時間</th><th class="right">預計時刻</th><th class="right">關門</th></tr></thead><tbody id="tb"></tbody></table></div></div>
 <div class="formula"><div class="formula-title">📐 EPH 計算公式</div><div class="fgrid"><div class="fi"><div class="fi-eq">EP = 距離(km) + 爬升(m) ÷ 100</div><div class="fi-desc">距離與垂直爬升整合成努力點數</div></div><div class="fi"><div class="fi-eq">時間(h) = EP ÷ EPH</div><div class="fi-desc">輸入每段 EPH 後反推所需時間</div></div><div class="fi"><div class="fi-eq">總時間 = 各段跑步 + 各站休息</div><div class="fi-desc">休息時間會影響後續所有到站推估</div></div><div class="fi"><div class="fi-eq">本賽 EP = 68.6 + 29.21 = 97.81</div><div class="fi-desc">官方距離 68.6km 與累積爬升 2,921m</div></div></div></div>
 </div>
@@ -75,6 +79,195 @@ const finishMg=(24*60+11*60)-t; document.getElementById('rb-run').textContent=fm
 function onEI(n){const v=parseFloat(document.getElementById('e'+n).value); if(!isNaN(v)){document.getElementById('sl'+n).value=v; updB(n,v); recalc();}}
 function onES(n){const v=parseFloat(document.getElementById('sl'+n).value); document.getElementById('e'+n).value=v.toFixed(1); updB(n,v); recalc();}
 function setE(n,v){document.getElementById('e'+n).value=v.toFixed(1); document.getElementById('sl'+n).value=v; updB(n,v); recalc();}
+
+function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function downloadWallpaper(){
+  recalc();
+  // Read current EPH values
+  const e=[0,1,2,3,4,5].map(i=>i?parseFloat(document.getElementById('e'+i).value)||8.0:0);
+  const r=[0,parseInt(document.getElementById('rest1').value)||0,parseInt(document.getElementById('rest2').value)||0,parseInt(document.getElementById('rest3').value)||0,parseInt(document.getElementById('rest4').value)||0];
+  const start=getStart();
+
+  // Compute MAIN pace rows
+  function calcRows(eph_arr){
+    let t=start, rows=[];
+    for(let i=0;i<SEGS.length;i++){
+      const s=SEGS[i], tm=(s.ep/eph_arr[i+1])*60; t+=tm;
+      rows.push({type:'seg',name:s.name.replace(' OSHINO','').replace(' YAMANAKAKO','').replace(' NIJU-MAGARI','').replace(' FUJIYOSHIDA',''),
+        short:['ST>>K1','K1>>K2','K2>>K3','K3>>K4','K4>>FIN'][i],
+        dist:s.dist, elev:s.gain, dur:fmtT(s.ep/eph_arr[i+1]), arr:fmtC(t)});
+      if(i<4){t+=r[i+1]; rows.push({type:'rest',name:['K1','K2','K3','K4'][i]+'休息',dur:r[i+1]+'m',arr:fmtC(t)});}
+    }
+    return {rows,finish:t};
+  }
+
+  const eMain=e.slice();
+  const eSlow=[0,1,2,3,4,5].map(i=>i?Math.max(4,e[i]-0.5):0);
+  const main=calcRows(eMain);
+  const slow=calcRows(eSlow);
+
+  const W=1290, H=2796;
+  const SAFE_TOP=220, SAFE_BOT=220;
+  const LX=64, RX=W-64, CW=RX-LX;
+  const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+  const ctx=cv.getContext('2d');
+  ctx.textBaseline='alphabetic';
+
+  // BG gradient
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#07080c');bg.addColorStop(.5,'#0d1020');bg.addColorStop(1,'#141526');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  // orbs
+  function orb(x,y,r2,c){const g=ctx.createRadialGradient(x,y,10,x,y,r2);g.addColorStop(0,c);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+  orb(150,H*.35,480,'rgba(192,38,211,.28)');
+  orb(W-160,H*.65,400,'rgba(96,212,245,.18)');
+  orb(W*.5,H*.55,350,'rgba(109,40,217,.14)');
+
+  let cy=SAFE_TOP+360;
+  function pad2(n){return String(Math.round(n)).padStart(2,'0');}
+
+  // Tag badge
+  ctx.fillStyle='rgba(216,138,227,.14)'; rr(ctx,LX,cy,260,50,25); ctx.fill();
+  ctx.strokeStyle='rgba(216,138,227,.32)'; ctx.lineWidth=1.5; rr(ctx,LX,cy,260,50,25); ctx.stroke();
+  ctx.fillStyle='#d88ae3'; ctx.font='700 21px Satoshi,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('Mt. FUJI 100',LX+18,cy+33);
+  cy+=62;
+
+  // Title
+  ctx.fillStyle='#eef1fb'; ctx.font='700 54px Satoshi,sans-serif';
+  ctx.fillText('KAI 70K 配速表',LX,cy); cy+=10;
+  ctx.fillStyle='#8b96b3'; ctx.font='22px Satoshi,sans-serif';
+  ctx.fillText('68.6km · +2,921m · 2026.04.25–26 · 關門 Apr.26 11:00',LX,cy+38); cy+=62;
+
+  // 4 stat cards
+  const mainFinish=main.finish, slowFinish=slow.finish;
+  const FIN_CUT=24*60+11*60;
+  const mainMg=FIN_CUT-mainFinish, slowMg=FIN_CUT-slowFinish;
+  function fmtMgC(d){const a=Math.abs(d),h=Math.floor(a/60),m=Math.round(a%60),s=h>0?`${h}h${pad2(m)}m`:`${m}m`;return d>=0?'+'+s:'-'+s;}
+
+  const stat4=[
+    {l:'起跑',v:document.getElementById('start-t').value,c:'#eef1fb'},
+    {l:'主配速完賽',v:fmtC(mainFinish).replace('Apr.25 ','').replace('Apr.26 ',''),c:'#f5a623'},
+    {l:'慢 0.5h 完賽',v:fmtC(slowFinish).replace('Apr.25 ','').replace('Apr.26 ',''),c:'#60d4f5'},
+    {l:'關門餘裕',v:fmtMgC(mainMg),c:mainMg<0?'#f66':mainMg<60?'#f5a623':'#52c47a'}
+  ];
+  const cw4=(CW-30)/4;
+  stat4.forEach((c,i)=>{
+    const cx=LX+i*(cw4+10);
+    ctx.fillStyle='rgba(255,255,255,.055)'; rr(ctx,cx,cy,cw4,108,20); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.09)'; ctx.lineWidth=1; rr(ctx,cx,cy,cw4,108,20); ctx.stroke();
+    ctx.fillStyle='#9aa5c0'; ctx.font='16px Satoshi,sans-serif'; ctx.textAlign='left';
+    ctx.fillText(c.l,cx+14,cy+26);
+    ctx.fillStyle=c.c; ctx.font='700 30px Satoshi,sans-serif';
+    ctx.fillText(c.v,cx+14,cy+78);
+  });
+  cy+=126;
+
+  // Table header bg
+  const rows=main.rows;
+  const SEG_H=94, REST_H=74, HDR_H=56;
+  const tblH=HDR_H+rows.reduce((a,row)=>a+(row.type==='seg'?SEG_H:REST_H),0)+20;
+
+  ctx.fillStyle='rgba(255,255,255,.04)'; rr(ctx,LX,cy,CW,tblH,24); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1.2; rr(ctx,LX,cy,CW,tblH,24); ctx.stroke();
+
+  // col positions: name, dist, elev, [main col], [slow col]
+  const c0=LX+22, c1=LX+CW-620, c2=LX+CW-490, c3=LX+CW-300, c4=LX+CW-18;
+
+  // Header
+  ctx.fillStyle='#8b96b3'; ctx.font='700 18px Satoshi,sans-serif';
+  ctx.textAlign='left'; ctx.fillText('區段',c0,cy+40);
+  ctx.textAlign='right';
+  ctx.fillText('距離',c1,cy+40);
+  ctx.fillText('爬升',c2,cy+40);
+  // EPH strings
+  const mainEphStr='EPH '+[1,2,3,4,5].map(i=>e[i].toFixed(1)).join('/');
+  const slowEphStr='EPH '+[1,2,3,4,5].map(i=>eSlow[i].toFixed(1)).join('/');
+  ctx.fillStyle='#f5a623'; ctx.textAlign='center';
+  ctx.fillText(mainEphStr,c3,cy+30);
+  ctx.fillStyle='#8b96b3'; ctx.font='15px Satoshi,sans-serif';
+  ctx.fillText('時間 / 到站',c3,cy+52);
+  ctx.fillStyle='#60d4f5'; ctx.font='700 18px Satoshi,sans-serif';
+  ctx.fillText(slowEphStr,c4-((c4-c3)/2),cy+30);
+  ctx.fillStyle='#8b96b3'; ctx.font='15px Satoshi,sans-serif';
+  ctx.fillText('時間 / 到站',(c3+c4)/2,cy+52);
+
+  ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(LX+14,cy+HDR_H); ctx.lineTo(LX+CW-14,cy+HDR_H); ctx.stroke();
+  cy+=HDR_H;
+
+  const slowRows=slow.rows;
+  rows.forEach((row,idx)=>{
+    const rh=row.type==='seg'?SEG_H:REST_H;
+    const sr=slowRows[idx];
+    if(idx>0){
+      ctx.strokeStyle='rgba(255,255,255,.07)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(LX+14,cy); ctx.lineTo(LX+CW-14,cy); ctx.stroke();
+    }
+    // vertical divider between cols
+    const midX=(c3+c4)/2-80;
+    ctx.strokeStyle='rgba(255,255,255,.08)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(midX,cy+8); ctx.lineTo(midX,cy+rh-8); ctx.stroke();
+
+    if(row.type==='seg'){
+      ctx.fillStyle='#eef1fb'; ctx.font='700 21px Satoshi,sans-serif'; ctx.textAlign='left';
+      ctx.fillText(row.short,c0,cy+34);
+      ctx.fillStyle='#9aa5c0'; ctx.font='19px Satoshi,sans-serif'; ctx.textAlign='right';
+      ctx.fillText(row.dist+'km',c1,cy+34);
+      ctx.fillText('↑'+row.elev+'m',c2,cy+34);
+      // main col
+      ctx.fillStyle='#f5a623'; ctx.font='700 24px Satoshi,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(row.dur,c3,cy+34);
+      ctx.fillStyle='#f5a623'; ctx.font='700 26px Satoshi,sans-serif';
+      ctx.fillText(row.arr.replace('Apr.25 ','').replace('Apr.26 ',''),c3,cy+72);
+      // slow col
+      ctx.fillStyle='#60d4f5'; ctx.font='700 24px Satoshi,sans-serif';
+      ctx.fillText(sr.dur,(c3+c4)/2,cy+34);
+      ctx.fillStyle='#60d4f5'; ctx.font='700 26px Satoshi,sans-serif';
+      ctx.fillText(sr.arr.replace('Apr.25 ','').replace('Apr.26 ',''),( c3+c4)/2,cy+72);
+    } else {
+      ctx.fillStyle='rgba(167,139,250,.10)'; ctx.fillRect(LX,cy,CW,rh);
+      ctx.fillStyle='#c4aaff'; ctx.font='700 19px Satoshi,sans-serif'; ctx.textAlign='left';
+      ctx.fillText(row.name,c0+8,cy+44);
+      // main: two lines, no overlap
+      ctx.fillStyle='#b993ff'; ctx.textAlign='center';
+      ctx.font='700 22px Satoshi,sans-serif';
+      ctx.fillText(row.dur,c3,cy+31);
+      ctx.font='18px Satoshi,sans-serif';
+      ctx.fillText(row.arr.replace('Apr.25 ','').replace('Apr.26 ',''),c3,cy+58);
+      // slow: two lines, no overlap
+      ctx.font='700 22px Satoshi,sans-serif';
+      ctx.fillText(sr.dur,(c3+c4)/2,cy+31);
+      ctx.font='18px Satoshi,sans-serif';
+      ctx.fillText(sr.arr.replace('Apr.25 ','').replace('Apr.26 ',''),(c3+c4)/2,cy+58);
+    }
+    cy+=rh;
+  });
+  cy+=20;
+
+  // footer legend
+  cy+=12;
+  ctx.fillStyle='#6b7899'; ctx.font='19px Satoshi,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('主配速：'+fmtC(mainFinish),LX,cy);
+  cy+=28;
+  ctx.fillStyle='#4a5470';
+  ctx.fillText('慢 0.5：'+fmtC(slowFinish),LX,cy);
+  cy+=42;
+  ctx.fillStyle=mainMg<0?'#ff6b6b':mainMg<60?'#f7b142':'#52c47a';
+  ctx.font='700 26px Satoshi,sans-serif';
+  ctx.fillText(fmtMgC(mainMg),LX,cy);
+  ctx.fillStyle='#6b7899'; ctx.font='20px Satoshi,sans-serif';
+  ctx.fillText('  主配速完賽餘裕',LX+90,cy);
+
+  // watermark
+  ctx.fillStyle='rgba(255,255,255,.14)'; ctx.font='20px Satoshi,sans-serif'; ctx.textAlign='right';
+  ctx.fillText('Mt. FUJI 100 · KAI 70K · Pace Wallpaper',RX,H-SAFE_BOT-28);
+
+  const a=document.createElement('a');
+  a.download='kai70k-pace-wallpaper.jpg';
+  a.href=cv.toDataURL('image/jpeg',0.94); a.click();
+}
+
 function updB(n,v){document.querySelectorAll('#ps'+n+' .preset').forEach(b=>{const bv=parseFloat(b.textContent); b.className='preset'+(bv===v?' on'+n:'');})}
 (function(){const btn=document.querySelector('[data-theme-toggle]'),html=document.documentElement; let t='dark'; function set(v){t=v;html.setAttribute('data-theme',v); btn.innerHTML=v==='dark'?'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'; btn.setAttribute('aria-label',v==='dark'?'切換亮色':'切換暗色'); } btn&&btn.addEventListener('click',()=>set(t==='dark'?'light':'dark')); set('dark');})(); recalc();
 </script>
